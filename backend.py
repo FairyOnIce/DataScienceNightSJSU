@@ -132,7 +132,8 @@ class ImageReader(object):
                 
         image_name = train_instance['filename']
         image = cv2.imread(image_name)
-
+        h, w, c = image.shape
+        
         if image is None: print('Cannot find ', image_name)
       
         image = self.encode_core(image, reorder_rgb=True)
@@ -140,7 +141,7 @@ class ImageReader(object):
         if "object" in train_instance.keys():
             # should be: 
             # h = self.IMAGE_H, w = self.IMAGE_W, c = 3
-            h, w, c = image.shape 
+             
             all_objs = copy.deepcopy(train_instance['object'])     
 
             # fix object's position and size

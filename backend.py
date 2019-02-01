@@ -1016,9 +1016,10 @@ def find_high_class_probability_bbox(netout_scale, obj_threshold):
     return(boxes)
 
 import cv2, copy
-def draw_boxes(image, boxes, labels, obj_baseline=0.05,verbose=False):
+def draw_boxes(_image, boxes, labels, obj_baseline=0.05,verbose=False):
     '''
     image : np.array of shape (N height, N width, 3)
+    assume image intensity ranging between 0 and 255
     '''
     def adjust_minmax(c,_max):
         if c < 0:
@@ -1027,10 +1028,13 @@ def draw_boxes(image, boxes, labels, obj_baseline=0.05,verbose=False):
             c = _max
         return c
     
-    image = copy.deepcopy(image)
-    image_h, image_w, _ = image.shape
+    overlay = _image.copy()
+    output  = _image.copy()
+    image_h, image_w, _ = _image.shape
     score_rescaled  = np.array([box.get_score() for box in boxes])
     score_rescaled /= obj_baseline
+    alpha_rect = 0.1
+
     for sr, box in zip(score_rescaled,boxes):
         xmin = adjust_minmax(int(box.xmin*image_w),image_w)
         ymin = adjust_minmax(int(box.ymin*image_h),image_h)
@@ -1041,20 +1045,21 @@ def draw_boxes(image, boxes, labels, obj_baseline=0.05,verbose=False):
         text = "{:10} {:4.3f}".format(labels[box.label], box.get_score())
         if verbose:
             print("{} xmin={:4.0f},ymin={:4.0f},xmax={:4.0f},ymax={:4.0f}".format(text,xmin,ymin,xmax,ymax,text))
-        cv2.rectangle(image, 
-                      pt1=(xmin,ymin), 
-                      pt2=(xmax,ymax), 
-                      color=(0,1,0), 
-                      thickness=sr)
-        cv2.putText(img       = image, 
+        cv2.rectangle(overlay, 
+                      pt1   = (xmin,ymin), 
+                      pt2   = (xmax,ymax), 
+                      color = (255,0,255),#Assume that image is [0,255] range
+                      thickness = sr)
+        cv2.putText(img       = output, 
                     text      = text, 
                     org       = (xmin+ 13, ymin + 13),
                     fontFace  = cv2.FONT_HERSHEY_SIMPLEX,
                     fontScale = 1e-3 * image_h,
-                    color     = (1, 0, 1),
+                    color     = (0,255,0),#Assume that image is [0,255] range
                     thickness = 1)
-        
-    return image
+        cv2.addWeighted(overlay, alpha_rect, output, 1 - alpha_rect,0, output)
+    return output
+
 
 def nonmax_suppression(boxes,iou_threshold,obj_threshold):
     '''

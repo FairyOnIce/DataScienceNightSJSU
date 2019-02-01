@@ -1050,13 +1050,14 @@ def draw_boxes(_image, boxes, labels, obj_baseline=0.05,verbose=False):
                       pt2   = (xmax,ymax), 
                       color = (255,0,255),#Assume that image is [0,255] range
                       thickness = sr)
-        cv2.putText(img       = output, 
-                    text      = text, 
-                    org       = (xmin+ 13, ymin + 13),
-                    fontFace  = cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale = 1e-3 * image_h,
-                    color     = (0,255,0),#Assume that image is [0,255] range
-                    thickness = 1)
+        for _img in [output, overlay]:
+            cv2.putText(img       = _img, 
+                        text      = text, 
+                        org       = (xmin+ 13, ymin + 13),
+                        fontFace  = cv2.FONT_HERSHEY_SIMPLEX,
+                        fontScale = 1e-3 * image_h,
+                        color     = (0,255,0),#Assume that image is [0,255] range
+                        thickness = 1)
         cv2.addWeighted(overlay, alpha_rect, output, 1 - alpha_rect,0, output)
     return output
 
@@ -1101,9 +1102,9 @@ def nonmax_suppression(boxes,iou_threshold,obj_threshold):
     
     return newboxes  
   
-## =========================== ##    
-## Load Pre-trained weights     
-## =========================== ##    
+## ========================================================= ##    
+## Load Pre-trained weights  SJSU data science night 
+## ========================================================= ##    
 
 class PreTrainedYOLODetector(object):
     def __init__(self):
